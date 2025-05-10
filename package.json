@@ -1,0 +1,66 @@
+{
+  "name": "country-capitals",
+  "version": "1.0.0",
+  "description": "A fully typed mapping of countries (ISO 3166-1 alpha-2 codes) to their official capital cities.",
+  "type": "module",
+  "author": "Venkata Phanindra Kumar Janapareddy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/venkatajanapareddy/country-capitals.git"
+  },
+  "bugs": {
+    "url": "https://github.com/venkatajanapareddy/country-capitals/issues"
+  },
+  "homepage": "https://github.com/venkatajanapareddy/country-capitals#readme",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "country-capitals": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./json": "./dist/countryCapitals.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vitest watch",
+    "build": "tsup --config ./config/tsup.config.ts",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "country",
+    "capital",
+    "city",
+    "map",
+    "iso-3166",
+    "geography",
+    "location",
+    "typescript",
+    "dataset",
+    "world"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.2"
+  }
+}
