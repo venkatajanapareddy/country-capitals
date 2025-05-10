@@ -65,8 +65,9 @@ export function runCli(
   return 1;
 }
 
-// Only run as script if this file is called directly (not imported)
-if (require.main === module || process.env.NODE_ENV !== 'test') {
+// Only run as script if this file is called directly (not imported in a test)
+// This check works in both ESM and CJS environments
+if (process.env.NODE_ENV !== 'test') {
   // Get the query from command line arguments
   const query = process.argv[2];
   const exitCode = runCli(query);
