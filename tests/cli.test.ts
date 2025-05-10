@@ -16,28 +16,21 @@ import {
   isCountryCode,
 } from '../src/index';
 
-// Mock process and console before importing the CLI
-const mockExit = vi.fn();
-const mockArgv = ['node', 'script'];
-const mockConsoleLog = vi.fn();
-const mockConsoleError = vi.fn();
-
-vi.mock('process', () => ({
-  argv: mockArgv,
-  exit: mockExit,
-}));
-
-vi.mock('console', () => ({
-  log: mockConsoleLog,
-  error: mockConsoleError,
-}));
+// Import the CLI function
+import { runCli, getHelpMessage } from '../src/cli';
 
 describe('CLI', () => {
+  // Use function types that match the runCli parameters
+  let mockConsoleLog: (message: string) => void;
+  let mockConsoleError: (message: string) => void;
+
   beforeEach(() => {
     // Reset mocks before each test
     vi.resetAllMocks();
-    // Reset process.argv mock
-    mockArgv.length = 2; // Keep only 'node' and 'script'
+
+    // Mock console.log and console.error
+    mockConsoleLog = vi.fn();
+    mockConsoleError = vi.fn();
   });
 
   afterEach(() => {
@@ -45,79 +38,62 @@ describe('CLI', () => {
     vi.clearAllMocks();
   });
 
-  it('should display help message when no arguments are provided', async () => {
-    // Import the CLI, which will run immediately with the mocked environment
-    await import('../src/cli');
+  it('should display help message when no arguments are provided', () => {
+    const exitCode = runCli(undefined, mockConsoleLog, mockConsoleError);
 
-    expect(mockConsoleLog).toHaveBeenCalled();
-    expect(mockConsoleLog.mock.calls[0][0]).toContain('country-capitals CLI');
-    expect(mockExit).toHaveBeenCalledWith(0);
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith(getHelpMessage());
+    expect(exitCode).toBe(0);
   });
 
-  it('should display help message when --help flag is provided', async () => {
-    // Setup argv with --help
-    mockArgv.push('--help');
+  it('should display help message when --help flag is provided', () => {
+    const exitCode = runCli('--help', mockConsoleLog, mockConsoleError);
 
-    // Import the CLI, which will run immediately
-    await import('../src/cli');
-
-    expect(mockConsoleLog).toHaveBeenCalled();
-    expect(mockConsoleLog.mock.calls[0][0]).toContain('country-capitals CLI');
-    expect(mockExit).toHaveBeenCalledWith(0);
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith(getHelpMessage());
+    expect(exitCode).toBe(0);
   });
 
-  it('should look up capital by country code', async () => {
-    // Setup argv with 'US'
-    mockArgv.push('US');
-
+  it('should look up capital by country code', () => {
     // Mock the utility functions for this test
     vi.mocked(isCountryCode).mockReturnValueOnce(true);
     vi.mocked(getCapital).mockReturnValueOnce('Washington, D.C.');
 
-    // Import the CLI, which will run immediately
-    await import('../src/cli');
+    const exitCode = runCli('US', mockConsoleLog, mockConsoleError);
 
     expect(isCountryCode).toHaveBeenCalledWith('US');
     expect(getCapital).toHaveBeenCalledWith('US');
     expect(mockConsoleLog).toHaveBeenCalledWith('Washington, D.C.');
-    expect(mockExit).toHaveBeenCalledWith(0);
+    expect(exitCode).toBe(0);
   });
 
-  it('should look up country code by capital', async () => {
-    // Setup argv with 'Paris'
-    mockArgv.push('Paris');
-
+  it('should look up country code by capital', () => {
     // Mock the utility functions for this test
     vi.mocked(isCountryCode).mockReturnValueOnce(false);
     vi.mocked(isCapital).mockReturnValueOnce(true);
     vi.mocked(getCountryCode).mockReturnValueOnce('FR');
 
-    // Import the CLI, which will run immediately
-    await import('../src/cli');
+    const exitCode = runCli('Paris', mockConsoleLog, mockConsoleError);
 
     expect(isCountryCode).toHaveBeenCalledWith('Paris');
     expect(isCapital).toHaveBeenCalledWith('Paris');
     expect(getCountryCode).toHaveBeenCalledWith('Paris');
     expect(mockConsoleLog).toHaveBeenCalledWith('FR');
-    expect(mockExit).toHaveBeenCalledWith(0);
+    expect(exitCode).toBe(0);
   });
 
-  it('should show error for unrecognized input', async () => {
-    // Setup argv with 'UnknownPlace'
-    mockArgv.push('UnknownPlace');
-
+  it('should show error for unrecognized input', () => {
     // Mock the utility functions for this test
     vi.mocked(isCountryCode).mockReturnValueOnce(false);
     vi.mocked(isCapital).mockReturnValueOnce(false);
 
-    // Import the CLI, which will run immediately
-    await import('../src/cli');
+    const exitCode = runCli('UnknownPlace', mockConsoleLog, mockConsoleError);
 
     expect(isCountryCode).toHaveBeenCalledWith('UnknownPlace');
     expect(isCapital).toHaveBeenCalledWith('UnknownPlace');
     expect(mockConsoleError).toHaveBeenCalledWith(
       'Error: "UnknownPlace" is not a recognized country code or capital city name.'
     );
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(exitCode).toBe(1);
   });
 });
